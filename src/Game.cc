@@ -196,8 +196,9 @@ void Game::setCellState(u32 x, u32 y, bool v){
     auto vertexIndex = (y * GRID_W + x) * 4;
 
     // For each vertices of the quad, set the appropriate color.
+    sf::Color col = v ? sf::Color::White : sf::Color(20, 20, 20, 255);
     for(u8 i=0; i<4;i ++){
-        m_vertices[vertexIndex+i].color = v ? sf::Color::White : sf::Color(20, 20, 20, 255);
+        m_vertices[vertexIndex+i].color = col;
     }
 }
 
