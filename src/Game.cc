@@ -78,9 +78,10 @@ void Game::handleEvent(const sf::Event& e){
 		case sf::Event::KeyPressed: {
 			switch(e.key.code){
 				// Regenerate cells on enter.
-				case sf::Keyboard::Key::Enter: generate();				  break;
+				case sf::Keyboard::Key::Enter: generate(); break;
 				// Change pause state on space.
-				case sf::Keyboard::Key::Space: m_paused = !m_paused;		break;
+				case sf::Keyboard::Key::Space: m_paused = !m_paused; break;
+				default: break;
 			}
 			break;
 		}
@@ -116,6 +117,8 @@ void Game::handleEvent(const sf::Event& e){
 
 			break;
 		}
+
+		default: break;
 	}
 }
 
@@ -134,7 +137,7 @@ void Game::update(){
 	
 	for(u16 x = 0; x < GRID_W; x++){
 		for(u16 y = 0; y < GRID_H; y++){
-			Cell* cell = getCell(x, y);
+			Cell *cell = getCell(x, y);
 			u8 neighbours = countNeighbours(x, y);
 			
 			// Alive cell will stay alive only if neighbours count is 2 or 3.
@@ -178,8 +181,7 @@ u8 Game::countNeighbours(u32 x, u32 y){
 			// Check if the new values aren't out of bounds.
 			if(checkX == -1 || checkX >= GRID_W || 
 			   checkY == -1 || checkY >= GRID_H ||
-			   (offsetX == 0 && offsetY == 0)) // And if the offseted cell isn't itself.
-			{
+			   (offsetX == 0 && offsetY == 0)) { // And if the offseted cell isn't itself.
 				continue;
 			}
 			
@@ -215,16 +217,10 @@ void Game::addQuad(u32 x, u32 y) {
 	float posY = y * CELL_SIZE;
 
 	// Set the vertices positions.
-	topLeft.position	  =  { posX + OUTLINE_SIZE,				posY + OUTLINE_SIZE};
-	bottomLeft.position   =  { posX + OUTLINE_SIZE,				posY + CELL_SIZE - OUTLINE_SIZE};
-	bottomRight.position  =  { posX + CELL_SIZE - OUTLINE_SIZE,	posY + CELL_SIZE - OUTLINE_SIZE};
-	topRight.position	 =  { posX + CELL_SIZE - OUTLINE_SIZE,	posY + OUTLINE_SIZE};
-
-	// There's no reason to set the texcoords since we dont use textures, but why not.
-	topLeft.texCoords	 =  { 0, 0 };
-	bottomLeft.texCoords  =  { 0, 1 };
-	bottomRight.texCoords =  { 1, 1 };
-	topRight.texCoords	=  { 1, 0 };
+	topLeft.position	=  { posX + OUTLINE_SIZE,		posY + OUTLINE_SIZE};
+	bottomLeft.position	=  { posX + OUTLINE_SIZE,		posY + CELL_SIZE - OUTLINE_SIZE};
+	bottomRight.position	=  { posX + CELL_SIZE - OUTLINE_SIZE,	posY + CELL_SIZE - OUTLINE_SIZE};
+	topRight.position	=  { posX + CELL_SIZE - OUTLINE_SIZE,	posY + OUTLINE_SIZE};
 
 	// The order of this is important.
 	m_vertices.push_back(topLeft);
