@@ -18,7 +18,7 @@ public:
     Game();
     ~Game();
     
-    void updateThreadFunc();
+    static void updateThreadFunc();
 
     u8 countNeighbours(u32 x, u32 y);
     Cell* getCell(u32 x, u32 y);
@@ -34,6 +34,8 @@ public:
     void addQuad(u32 x, u32 y);
 
 private:
+    static Game *s_instance;
+
     sf::Thread* m_updateThread;
     sf::View* m_camera;
     sf::RenderWindow* m_window;
