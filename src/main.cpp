@@ -175,6 +175,9 @@ static void updateCellAtIdx(const u32 idx, bool v) {
 }
 
 static void handleEvent(const sf::Event &e) {
+	if(gui.handleEvent(e))
+		return;
+
 	switch(e.type) {
 		case sf::Event::Closed: 
 			window.close();
