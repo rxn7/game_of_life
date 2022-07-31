@@ -7,9 +7,9 @@ struct Position {
 
 	Position() : x(0), y(0) { }
 	Position(u32 x, u32 y) : x(x), y(y) { }
-	Position(u32 idx) : x(idx % GRID_W), y(idx / GRID_W) { }
+	Position(u32 idx) : x(idx % GRID_SIDE), y(idx / GRID_SIDE) { }
 
 	u32 asGridIndex() const {
-		return y*GRID_W+x;
+		return y*GRID_SIDE+x;
 	}
 };
