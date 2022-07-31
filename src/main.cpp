@@ -14,6 +14,12 @@
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include <TGUI/Backends/SFML.hpp>
+#include <TGUI/TGUI.hpp>
+#include <TGUI/Widgets/CheckBox.hpp>
+#include <TGUI/Widgets/ColorPicker.hpp>
+#include <TGUI/Widgets/Label.hpp>
+#include <TGUI/Widgets/VerticalLayout.hpp>
 #include <memory>
 #include <iostream>
 #include <sstream>
@@ -22,48 +28,66 @@
 #include "position.h"
 
 static void init();
+static void initGui();
 static void generateCells();
 static void startGameLoop();
-static void setupFont();
 static void handleEvent(const sf::Event &e);
 static void updateLogic();
+static void updateDebugLabel();
 static void render();
 static void update();
 static void logicThreadFunc();
 static void vertexBuildThreadFunc();
 static void updateCellAtPosition(const Position &position, bool v);
 static void updateCellAtIdx(const u32 idx, bool v);
-static void setupDebugText();
-static void updateDebugText();
 static bool isAnyCellAt(const Position &position);
 static u8 countCellNeighbours(const Position &position);
 
+static void onGuiPauseCheckboxChange(bool v);
+
 static u32 fps;
 static u32 delta_time_us;
-static sf::Text debug_text;
-static sf::Font font;
-static sf::View camera_view, ui_view;
+static sf::View camera_view;
 static sf::RenderWindow window(sf::VideoMode(WINDOW_W, WINDOW_H), "rxn's Game of Life");
-static sf::VertexArray cells_vertex_array(sf::PrimitiveType::Quads, CELL_COUNT*4);
+
 static sf::Thread logic_thread(logicThreadFunc);
-static sf::Mutex cells_vertex_array_mutex;
 static sf::Thread vertex_build_thread(vertexBuildThreadFunc);
+static sf::VertexArray cells_vertex_array(sf::PrimitiveType::Quads, CELL_COUNT*4);
+static sf::Mutex cells_vertex_array_mutex;
 static bool vertex_build_queued = false;
+
+static tgui::Gui gui(window);
+static tgui::ColorPicker::Ptr gui_cell_color_picker = tgui::ColorPicker::create("Cell color", DEFAULT_CELL_COLOR);
+static tgui::Label::Ptr gui_debug_label = tgui::Label::create("debug");
+static tgui::CheckBox::Ptr gui_pause_checkbox = tgui::CheckBox::create("Pause logic");
 
 static bool cells[CELL_COUNT];
 static f32 old_mouse_x, old_mouse_y;
 static bool is_paused = false;
 
 static void init() {
-	setupFont();
-	setupDebugText();
+	generateCells();
+	initGui();
+	logic_thread.launch();
+	vertex_build_thread.launch();
+}
+
+static  void initGui() {
+	gui.setTextSize(25);
+
+	gui.add(gui_debug_label);
+	gui_debug_label->setPosition({"10px", "10px"});
+
+	gui.add(gui_pause_checkbox);
+	gui_pause_checkbox->onChange.connect(onGuiPauseCheckboxChange);
+	gui_pause_checkbox->setPosition({"10px", "60px"});
+
+	gui.add(gui_cell_color_picker);
+	gui_cell_color_picker->setPosition({"100%-500px", "10px"});
+	gui_cell_color_picker->setSize({"500px", "500px"});
 }
 
 static void startGameLoop() {
-	generateCells();
-	logic_thread.launch();
-	vertex_build_thread.launch();
-
 	sf::Event e;
 	sf::Clock frame_clock;
 	sf::Time this_frame_time, old_frame_time;
@@ -82,19 +106,18 @@ static void startGameLoop() {
 }
 
 static void update() {
-	updateDebugText();
+	updateDebugLabel();
 }
 
 static void render() {
-	window.clear();
+	window.clear(sf::Color::White);
 
 	window.setView(camera_view);
 	cells_vertex_array_mutex.lock();
 	window.draw(cells_vertex_array);
 	cells_vertex_array_mutex.unlock();
 
-	window.setView(ui_view);
-	window.draw(debug_text);
+	gui.draw();
 
 	window.display();
 }
@@ -165,6 +188,7 @@ static void handleEvent(const sf::Event &e) {
 
 				case sf::Keyboard::Key::Escape:
 					is_paused = !is_paused;
+					gui_pause_checkbox->setChecked(is_paused);
 					break;
 
 				default:
@@ -195,7 +219,6 @@ static void handleEvent(const sf::Event &e) {
 		case sf::Event::Resized:
 			vertex_build_queued = true;
 			camera_view = sf::View({0,0, (f32)e.size.width, (f32)e.size.height});
-			ui_view = camera_view;
 			break;
 
 		default:
@@ -203,29 +226,15 @@ static void handleEvent(const sf::Event &e) {
 	}
 }
 
+static void updateDebugLabel() {
+	std::ostringstream output;
+	output << "fps: " << fps << "(" << delta_time_us << "us)";
+	gui_debug_label->setText(output.str());
+}
+
 static void generateCells() {
 	for(u32 i = 0; i < CELL_COUNT; ++i)
 		updateCellAtIdx(i, static_cast<bool>(!(rand() % 6))); // ~16% chance for cele to be alive
-}
-
-static void setupFont() {
-	if(!font.loadFromFile("res/roboto.ttf"))
-		std::cerr << "Failed to load the font!\n";
-}
-
-static void setupDebugText() {
-	debug_text.setFont(font);
-	debug_text.setString("DEBUG");
-	debug_text.setCharacterSize(24);
-	debug_text.setFillColor(sf::Color::White);
-	debug_text.setOutlineColor(sf::Color::Black);
-	debug_text.setOutlineThickness(2);
-}
-
-static void updateDebugText() {
-	std::ostringstream output;
-	output << "fps: " << fps << "(" << delta_time_us << "us)";
-	debug_text.setString(output.str());
 }
 
 static void logicThreadFunc() { 
@@ -264,7 +273,7 @@ static void vertexBuildThreadFunc() {
 					continue;
 
 				sf::Vertex v;
-				v.color = cells[i] ? ALIVE_CELL_COLOR : DEAD_CELL_COLOR,
+				v.color = sf::Color::Black;
 
 				v.position = { left, bottom },
 				built_vertex_array.append(v);
@@ -286,6 +295,10 @@ static void vertexBuildThreadFunc() {
 
 		sf::sleep(sf::milliseconds(3));
 	}
+}
+
+static void onGuiPauseCheckboxChange(bool v) {
+	is_paused = v;
 }
 
 i32 main(i32 argc, const char **argv) {

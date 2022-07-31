@@ -7,7 +7,7 @@ INC := -Isrc
 CFLAGS := -std=c++20
 SRC := $(wildcard $(addsuffix /*.cpp, $(DIR_SRC)))
 OBJ := $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(SRC))
-LIBS := -lsfml-graphics -lsfml-window -lsfml-system
+LIBS := -lsfml-graphics -lsfml-window -lsfml-system -ltgui
 
 all: create_dirs copy_resources $(OBJ) $(OUT)
 
