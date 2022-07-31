@@ -260,6 +260,9 @@ static void vertexBuildThreadFunc() {
 
 			// TODO: checking camera view intersecion on each cell is slow, some kind of chunk system is needed in future
 			for(u32 i = 0; i < CELL_COUNT; ++i) {
+				if(!cells[i])
+					continue;
+
 				u32 x = (i % GRID_SIDE) * CELL_SIZE;
 				u32 y = (u32)(i / GRID_SIDE) * CELL_SIZE;
 
