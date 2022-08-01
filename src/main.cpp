@@ -17,9 +17,7 @@
 #include <TGUI/Backends/SFML.hpp>
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Widgets/CheckBox.hpp>
-#include <TGUI/Widgets/ColorPicker.hpp>
 #include <TGUI/Widgets/Label.hpp>
-#include <TGUI/Widgets/VerticalLayout.hpp>
 #include <memory>
 #include <iostream>
 #include <sstream>
@@ -57,7 +55,6 @@ static sf::Mutex cells_vertex_array_mutex;
 static bool vertex_build_queued = false;
 
 static tgui::Gui gui(window);
-static tgui::ColorPicker::Ptr gui_cell_color_picker = tgui::ColorPicker::create("Cell color", DEFAULT_CELL_COLOR);
 static tgui::Label::Ptr gui_debug_label = tgui::Label::create("debug");
 static tgui::CheckBox::Ptr gui_pause_checkbox = tgui::CheckBox::create("Pause logic");
 
@@ -81,10 +78,6 @@ static  void initGui() {
 	gui.add(gui_pause_checkbox);
 	gui_pause_checkbox->onChange.connect(onGuiPauseCheckboxChange);
 	gui_pause_checkbox->setPosition({"10px", "60px"});
-
-	gui.add(gui_cell_color_picker);
-	gui_cell_color_picker->setPosition({"100%-500px", "10px"});
-	gui_cell_color_picker->setSize({"500px", "500px"});
 }
 
 static void startGameLoop() {
@@ -252,6 +245,8 @@ static void logicThreadFunc() {
 }
 
 static void vertexBuildThreadFunc() {
+	sf::Vertex v;
+	v.color = DEFAULT_CELL_COLOR;
 	while(window.isOpen()) {
 		if(vertex_build_queued) {
 			vertex_build_queued = false;
@@ -277,9 +272,6 @@ static void vertexBuildThreadFunc() {
 				sf::FloatRect bounds = {(f32)x, (f32)y, CELL_SIZE, CELL_SIZE};
 				if(!bounds.intersects(cam_rect))
 					continue;
-
-				sf::Vertex v;
-				v.color = sf::Color::Black;
 
 				v.position = { left, bottom },
 				built_vertex_array.append(v);
