@@ -212,10 +212,11 @@ static void handleEvent(const sf::Event &e) {
 				camera_view.zoom(0.9);
 			break;
 
-		case sf::Event::Resized:
+		case sf::Event::Resized: {
 			vertex_build_queued = true;
-			camera_view = sf::View({0,0, (f32)e.size.width, (f32)e.size.height});
+			camera_view.setSize({(f32)e.size.width, (f32)e.size.height}); // TODO: Keep the zoom
 			break;
+		}
 
 		default:
 			break;
