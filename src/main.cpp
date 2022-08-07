@@ -194,7 +194,7 @@ static void handleEvent(const sf::Event &e) {
 		
 		case sf::Event::MouseMoved:
 			if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-				f32 move_speed = (camera_view.getSize().x / 2.0f) * MOVE_SPEED;
+				f32 move_speed = (camera_view.getSize().x / 2.0f) * CAMERA_MOVE_SPEED;
 				f32 delta_x = old_mouse_x - e.mouseMove.x;
 				f32 delta_y = old_mouse_y - e.mouseMove.y;
 				camera_view.move(delta_x * move_speed, delta_y * move_speed);

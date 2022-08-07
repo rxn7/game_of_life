@@ -18,7 +18,7 @@ typedef double f64;
 
 #define WINDOW_W 1280
 #define WINDOW_H 720
-#define MOVE_SPEED 0.001f
+#define CAMERA_MOVE_SPEED 0.003f
 #define UPDATE_RATE_MS 70
 #define CELL_SIZE 12
 #define OUTLINE_SIZE 1
