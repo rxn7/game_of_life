@@ -11,9 +11,11 @@
 #include <SFML/System/Sleep.hpp>
 #include <SFML/System/Thread.hpp>
 #include <SFML/System/Time.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <TGUI/Backends/SFML.hpp>
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Widgets/CheckBox.hpp>
@@ -39,6 +41,7 @@ static void vertexBuildThreadFunc();
 static void updateCellAtPosition(const Position &position, bool v);
 static void updateCellAtIdx(const u32 idx, bool v);
 static bool isAnyCellAt(const Position &position);
+static void placeCell();
 static u8 countCellNeighbours(const Position &position);
 
 static void onGuiPauseCheckboxChange(bool v);
@@ -100,6 +103,9 @@ static void startGameLoop() {
 
 static void update() {
 	updateDebugLabel();
+	
+	if(sf::Mouse::isButtonPressed(sf::Mouse::Right))
+		placeCell();
 }
 
 static void render() {
@@ -298,6 +304,19 @@ static void vertexBuildThreadFunc() {
 
 static void onGuiPauseCheckboxChange(bool v) {
 	is_paused = v;
+}
+
+static void placeCell() {
+	sf::Vector2f global_pos = window.mapPixelToCoords(sf::Mouse::getPosition(window), camera_view);
+	Position grid_pos(global_pos.x / CELL_SIZE, global_pos.y / CELL_SIZE);
+
+	std::cout << global_pos.x << " " << global_pos.y << "\n";
+	std::cout << grid_pos.x << " " << grid_pos.y << "\n";
+
+	if(grid_pos.x < 0 || grid_pos.x >= GRID_SIDE || grid_pos.y < 0 || grid_pos.y >= GRID_SIDE)
+		return;
+
+	updateCellAtPosition(grid_pos, true);
 }
 
 i32 main(i32 argc, const char **argv) {
