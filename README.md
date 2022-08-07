@@ -1,11 +1,15 @@
 # game_of_life
 Conway's game of life written in C++ using SFML library.  
+
+# Screenshots (OLD)
 ![screenshot1](.github/screenshot1.png)
 ![screenshot2](.github/screenshot2.png)
 
 # Features
-* Zooming   
-* Moving around   
+* Zooming (scroll with your mouse)
+* Moving around (move the mouse while holding the left mouse button)
+* Pausing (hit escape or click the GUI pause button)
+* Placing cells (hold/click right mouse button)
 
 # Optimizations
 Used optimizations:

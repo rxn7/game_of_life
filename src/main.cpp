@@ -1,3 +1,4 @@
+#include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/PrimitiveType.hpp>
@@ -11,9 +12,11 @@
 #include <SFML/System/Sleep.hpp>
 #include <SFML/System/Thread.hpp>
 #include <SFML/System/Time.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <TGUI/Backends/SFML.hpp>
 #include <TGUI/TGUI.hpp>
 #include <TGUI/Widgets/CheckBox.hpp>
@@ -39,7 +42,9 @@ static void vertexBuildThreadFunc();
 static void updateCellAtPosition(const Position &position, bool v);
 static void updateCellAtIdx(const u32 idx, bool v);
 static bool isAnyCellAt(const Position &position);
+static void placeCell();
 static u8 countCellNeighbours(const Position &position);
+static void zoomView(f32 value);
 
 static void onGuiPauseCheckboxChange(bool v);
 
@@ -100,6 +105,9 @@ static void startGameLoop() {
 
 static void update() {
 	updateDebugLabel();
+	
+	if(sf::Mouse::isButtonPressed(sf::Mouse::Right))
+		placeCell();
 }
 
 static void render() {
@@ -206,10 +214,7 @@ static void handleEvent(const sf::Event &e) {
 
 		case sf::Event::MouseWheelScrolled:
 			vertex_build_queued = true;
-			if(e.mouseWheelScroll.delta < 0)
-				camera_view.zoom(1.1);
-			else if(e.mouseWheelScroll.delta > 0)
-				camera_view.zoom(0.9);
+			zoomView(e.mouseWheelScroll.delta);
 			break;
 
 		case sf::Event::Resized: {
@@ -298,6 +303,26 @@ static void vertexBuildThreadFunc() {
 
 static void onGuiPauseCheckboxChange(bool v) {
 	is_paused = v;
+}
+
+static void placeCell() {
+	sf::Vector2f global_pos = window.mapPixelToCoords(sf::Mouse::getPosition(window), camera_view);
+	Position grid_pos(global_pos.x / CELL_SIZE, global_pos.y / CELL_SIZE);
+
+	if(grid_pos.x < 0 || grid_pos.x >= GRID_SIDE || grid_pos.y < 0 || grid_pos.y >= GRID_SIDE)
+		return;
+
+	updateCellAtPosition(grid_pos, true);
+}
+
+static void zoomView(f32 value) {
+	sf::Vector2i mouse_pos = sf::Mouse::getPosition(window);
+
+	sf::Vector2f old_pos(window.mapPixelToCoords(mouse_pos, camera_view));
+	camera_view.zoom(1 - value * 0.1);
+	sf::Vector2f new_pos(window.mapPixelToCoords(mouse_pos, camera_view));
+
+	camera_view.move(old_pos - new_pos);
 }
 
 i32 main(i32 argc, const char **argv) {
