@@ -1,5 +1,7 @@
 # game_of_life
 Conway's game of life written in C++ using SFML library.  
+
+# Screenshots (OLD)
 ![screenshot1](.github/screenshot1.png)
 ![screenshot2](.github/screenshot2.png)
 
