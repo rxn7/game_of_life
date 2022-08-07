@@ -64,7 +64,7 @@ static tgui::Label::Ptr gui_debug_label = tgui::Label::create("debug");
 static tgui::CheckBox::Ptr gui_pause_checkbox = tgui::CheckBox::create("Pause logic");
 
 static bool cells[CELL_COUNT];
-static f32 old_mouse_x, old_mouse_y;
+static sf::Vector2f old_mouse_pos;
 static bool is_paused = false;
 
 static void init() {
@@ -202,14 +202,12 @@ static void handleEvent(const sf::Event &e) {
 		
 		case sf::Event::MouseMoved:
 			if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-				f32 move_speed = (camera_view.getSize().x / 2.0f) * CAMERA_MOVE_SPEED;
-				f32 delta_x = old_mouse_x - e.mouseMove.x;
-				f32 delta_y = old_mouse_y - e.mouseMove.y;
-				camera_view.move(delta_x * move_speed, delta_y * move_speed);
+				f32 zoom = camera_view.getSize().x / window.getSize().x;
+				sf::Vector2f movement = (old_mouse_pos - sf::Vector2f((f32)e.mouseMove.x, (f32)e.mouseMove.y)) * zoom;
+				camera_view.move(movement);
 				vertex_build_queued = true;
 			}
-			old_mouse_x = e.mouseMove.x;
-			old_mouse_y = e.mouseMove.y;
+			old_mouse_pos = { (f32)e.mouseMove.x, (f32)e.mouseMove.y, };
 			break;
 
 		case sf::Event::MouseWheelScrolled:
