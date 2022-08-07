@@ -17,10 +17,6 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
-#include <TGUI/Backends/SFML.hpp>
-#include <TGUI/TGUI.hpp>
-#include <TGUI/Widgets/CheckBox.hpp>
-#include <TGUI/Widgets/Label.hpp>
 #include <memory>
 #include <iostream>
 #include <sstream>
@@ -46,11 +42,9 @@ static void placeCell();
 static u8 countCellNeighbours(const Position &position);
 static void zoomView(f32 value);
 
-static void onGuiPauseCheckboxChange(bool v);
-
 static u32 fps;
 static u32 delta_time_us;
-static sf::View camera_view;
+static sf::View camera_view, ui_view;
 static sf::RenderWindow window(sf::VideoMode(WINDOW_W, WINDOW_H), "rxn's Game of Life");
 
 static sf::Thread logic_thread(logicThreadFunc);
@@ -59,9 +53,8 @@ static sf::VertexArray cells_vertex_array(sf::PrimitiveType::Quads, CELL_COUNT*4
 static sf::Mutex cells_vertex_array_mutex;
 static bool vertex_build_queued = false;
 
-static tgui::Gui gui(window);
-static tgui::Label::Ptr gui_debug_label = tgui::Label::create("debug");
-static tgui::CheckBox::Ptr gui_pause_checkbox = tgui::CheckBox::create("Pause logic");
+static sf::Text debug_label;
+static sf::Font font;
 
 static bool cells[CELL_COUNT];
 static sf::Vector2f old_mouse_pos;
@@ -75,14 +68,15 @@ static void init() {
 }
 
 static  void initGui() {
-	gui.setTextSize(25);
+	if(!font.loadFromFile("./res/roboto.ttf")) {
+		std::cerr << "Failed to load the font\n";
+		return;
+	}
 
-	gui.add(gui_debug_label);
-	gui_debug_label->setPosition({"10px", "10px"});
-
-	gui.add(gui_pause_checkbox);
-	gui_pause_checkbox->onChange.connect(onGuiPauseCheckboxChange);
-	gui_pause_checkbox->setPosition({"10px", "60px"});
+	debug_label.setFont(font);
+	debug_label.setCharacterSize(20);
+	debug_label.setFillColor(sf::Color::Black);
+	debug_label.setPosition({0,0});
 }
 
 static void startGameLoop() {
@@ -114,11 +108,13 @@ static void render() {
 	window.clear(sf::Color::White);
 
 	window.setView(camera_view);
+
 	cells_vertex_array_mutex.lock();
 	window.draw(cells_vertex_array);
 	cells_vertex_array_mutex.unlock();
 
-	gui.draw();
+	window.setView(ui_view);
+	window.draw(debug_label);
 
 	window.display();
 }
@@ -148,8 +144,8 @@ static void updateLogic() {
 u8 countCellNeighbours(const Position &position) {
 	u8 count = 0;
 
-	for(auto of_y = -1 ; of_y <= 1; ++of_y) {
-		for(auto of_x = -1 ; of_x <= 1; ++of_x) {
+	for(i32 of_y = -1 ; of_y <= 1; ++of_y) {
+		for(i32 of_x = -1 ; of_x <= 1; ++of_x) {
 			// out of bounds check
 			if((position.x == 0 && of_x == -1) || (position.x == GRID_SIDE-1 && of_x == 1) || (position.y == 0 && of_y == -1) || (position.y == GRID_SIDE-1 && of_y == 1) || (of_x == 0 && of_y == 0))
 				continue;
@@ -176,9 +172,6 @@ static void updateCellAtIdx(const u32 idx, bool v) {
 }
 
 static void handleEvent(const sf::Event &e) {
-	if(gui.handleEvent(e))
-		return;
-
 	switch(e.type) {
 		case sf::Event::Closed: 
 			window.close();
@@ -192,7 +185,6 @@ static void handleEvent(const sf::Event &e) {
 
 				case sf::Keyboard::Key::Escape:
 					is_paused = !is_paused;
-					gui_pause_checkbox->setChecked(is_paused);
 					break;
 
 				default:
@@ -202,8 +194,8 @@ static void handleEvent(const sf::Event &e) {
 		
 		case sf::Event::MouseMoved:
 			if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-				f32 zoom = camera_view.getSize().x / window.getSize().x;
-				sf::Vector2f movement = (old_mouse_pos - sf::Vector2f((f32)e.mouseMove.x, (f32)e.mouseMove.y)) * zoom;
+				const f32 zoom = camera_view.getSize().x / window.getSize().x;
+				const sf::Vector2f movement = (old_mouse_pos - sf::Vector2f((f32)e.mouseMove.x, (f32)e.mouseMove.y)) * zoom;
 				camera_view.move(movement);
 				vertex_build_queued = true;
 			}
@@ -217,7 +209,10 @@ static void handleEvent(const sf::Event &e) {
 
 		case sf::Event::Resized: {
 			vertex_build_queued = true;
-			camera_view.setSize({(f32)e.size.width, (f32)e.size.height}); // TODO: Keep the zoom
+			sf::Vector2f size(window.getSize());
+			camera_view.setSize(size); // TODO: Keep the zoom
+			ui_view.setCenter(size.x * 0.5f, size.y * 0.5f);
+			ui_view.setSize(size);
 			break;
 		}
 
@@ -229,7 +224,7 @@ static void handleEvent(const sf::Event &e) {
 static void updateDebugLabel() {
 	std::ostringstream output;
 	output << "fps: " << fps << "(" << delta_time_us << "us)";
-	gui_debug_label->setText(output.str());
+	debug_label.setString(output.str());
 }
 
 static void generateCells() {
@@ -239,6 +234,7 @@ static void generateCells() {
 
 static void logicThreadFunc() { 
 	while(window.isOpen()) {
+		// TODO: Dynamic update rate (changable via gui)
 		sf::sleep(sf::milliseconds(UPDATE_RATE_MS));
 
 		if(is_paused)
@@ -299,10 +295,6 @@ static void vertexBuildThreadFunc() {
 	}
 }
 
-static void onGuiPauseCheckboxChange(bool v) {
-	is_paused = v;
-}
-
 static void placeCell() {
 	sf::Vector2f global_pos = window.mapPixelToCoords(sf::Mouse::getPosition(window), camera_view);
 	Position grid_pos(global_pos.x / CELL_SIZE, global_pos.y / CELL_SIZE);
@@ -317,7 +309,7 @@ static void zoomView(f32 value) {
 	sf::Vector2i mouse_pos = sf::Mouse::getPosition(window);
 
 	sf::Vector2f old_pos(window.mapPixelToCoords(mouse_pos, camera_view));
-	camera_view.zoom(1 - value * 0.1);
+	camera_view.zoom(1 - value * ZOOM_FACTOR);
 	sf::Vector2f new_pos(window.mapPixelToCoords(mouse_pos, camera_view));
 
 	camera_view.move(old_pos - new_pos);
