@@ -1,4 +1,4 @@
-// if you have changed something in this file without changing any source files remember to call 'make clean' before compiling.
+// if you have changed something in this file without changing any source files remember to 'make clean' before compiling.
 
 #pragma once
 
@@ -18,7 +18,7 @@ typedef double f64;
 
 #define WINDOW_W 1280
 #define WINDOW_H 720
-#define UPDATE_RATE_MS 70
+#define UPDATE_INTERVAL_MS 100
 #define CELL_SIZE 12
 #define OUTLINE_SIZE 1.f
 #define ZOOM_FACTOR 0.1f
