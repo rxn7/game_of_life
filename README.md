@@ -1,7 +1,7 @@
-# game_of_life
+# Game of Life
 Conway's game of life written in C++ using SFML library.  
 
-# Screenshots (OLD)
+# Screenshots
 ![screenshot1](.github/screenshot1.png)
 ![screenshot2](.github/screenshot2.png)
 
@@ -29,7 +29,7 @@ SFML is sort of limiting in sense of optimizing the rendering, but I think sendi
 
 # Running
 ## If you're on Linux
-* Make sure you have SFML2 and TGUI installed on your system.  
+* Make sure you have SFML2 installed on your system.  
 * Run these commands:  
 	* ```git clone https://github.com/rxttthin/game_of_life```   
 	* ```cd game_of_life```   
