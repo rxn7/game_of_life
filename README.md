@@ -7,9 +7,10 @@ Conway's game of life written in C++ using SFML library.
 
 # Features
 * Zooming (scroll with your mouse)
-* Moving around (move the mouse while holding the left mouse button)
+* Moving around (move the mouse while pressing the mouse scroll)
 * Pausing (hit escape or click the GUI pause button)
-* Placing cells (hold/click right mouse button)
+* Placing cells (hold/click left mouse button)
+* Removing cells (hold/click right mouse button)
 
 # To do
 * Chunk system
