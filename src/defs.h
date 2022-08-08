@@ -23,7 +23,6 @@ typedef double f64;
 #define OUTLINE_SIZE 1
 #define ZOOM_FACTOR 0.1f
 #define GRID_SIDE 600
-#define DEFAULT_CELL_COLOR sf::Color::Black
-#define DEAD_CELL_COLOR sf::Color::White
+#define DEFAULT_CELL_COLOR sf::Color::White
 
 static constexpr u32 CELL_COUNT = GRID_SIDE * GRID_SIDE;

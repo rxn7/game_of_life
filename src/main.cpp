@@ -60,6 +60,11 @@ static bool cells[CELL_COUNT];
 static sf::Vector2f old_mouse_pos;
 static bool is_paused = false;
 
+i32 main(i32 argc, const char **argv) {
+	init();
+	startGameLoop();
+}
+
 static void init() {
 	generateCells();
 	initGui();
@@ -75,7 +80,7 @@ static  void initGui() {
 
 	debug_label.setFont(font);
 	debug_label.setCharacterSize(20);
-	debug_label.setFillColor(sf::Color::Black);
+	debug_label.setFillColor(sf::Color::White);
 	debug_label.setPosition({0,0});
 }
 
@@ -105,7 +110,7 @@ static void update() {
 }
 
 static void render() {
-	window.clear(sf::Color::White);
+	window.clear(sf::Color::Black);
 
 	window.setView(camera_view);
 
@@ -290,8 +295,6 @@ static void vertexBuildThreadFunc() {
 			cells_vertex_array = built_vertex_array;
 			cells_vertex_array_mutex.unlock();
 		}
-
-		sf::sleep(sf::milliseconds(3));
 	}
 }
 
@@ -313,9 +316,4 @@ static void zoomView(f32 value) {
 	sf::Vector2f new_pos(window.mapPixelToCoords(mouse_pos, camera_view));
 
 	camera_view.move(old_pos - new_pos);
-}
-
-i32 main(i32 argc, const char **argv) {
-	init();
-	startGameLoop();
 }
