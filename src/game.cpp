@@ -38,7 +38,9 @@ void Game::start() {
 
 void Game::update() {
 	if(sf::Mouse::isButtonPressed(sf::Mouse::Right))
-		placeCellAtCursor();
+		setCellAtCursor(false);
+	else if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		setCellAtCursor(true);
 
 	updateDebugLabel();
 }
@@ -73,7 +75,7 @@ void Game::handleEvent(const sf::Event &e) {
 			break;
 		
 		case sf::Event::MouseMoved:
-			if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+			if(sf::Mouse::isButtonPressed(sf::Mouse::Middle)) {
 				const f32 zoom = m_camera_view.getSize().x / m_window.getSize().x;
 				const sf::Vector2f movement = (m_old_mouse_pos - sf::Vector2f((f32)e.mouseMove.x, (f32)e.mouseMove.y)) * zoom;
 				m_camera_view.move(movement);
@@ -129,12 +131,12 @@ void Game::updateDebugLabel() {
 	m_debug_label.setString(output.str());
 }
 
-void Game::placeCellAtCursor() {
+void Game::setCellAtCursor(bool value) {
 	sf::Vector2f global_pos = m_window.mapPixelToCoords(sf::Mouse::getPosition(m_window), m_camera_view);
 	Position grid_pos(global_pos.x / CELL_SIZE, global_pos.y / CELL_SIZE);
 
 	if(grid_pos.x < 0 || grid_pos.x >= GRID_SIDE || grid_pos.y < 0 || grid_pos.y >= GRID_SIDE)
 		return;
 
-	m_board->setCellAt(grid_pos, true);
+	m_board->setCellAt(grid_pos, value);
 }

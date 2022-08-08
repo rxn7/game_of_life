@@ -28,7 +28,7 @@ private:
 	void render();
 	void handleEvent(const sf::Event &event);
 	void zoomCameraView(float value);
-	void placeCellAtCursor();
+	void setCellAtCursor(bool value);
 	void updateDebugLabel();
 
 private:
