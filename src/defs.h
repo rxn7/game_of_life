@@ -20,7 +20,7 @@ typedef double f64;
 #define WINDOW_H 720
 #define UPDATE_RATE_MS 70
 #define CELL_SIZE 12
-#define OUTLINE_SIZE 0.5f
+#define OUTLINE_SIZE 1.f
 #define ZOOM_FACTOR 0.1f
 #define DEFAULT_CELL_COLOR sf::Color::White
 #define CLEAR_COLOR sf::Color(0x242424FF)
