@@ -110,7 +110,7 @@ static void update() {
 }
 
 static void render() {
-	window.clear(sf::Color::Black);
+	window.clear(CLEAR_COLOR);
 
 	window.setView(camera_view);
 
