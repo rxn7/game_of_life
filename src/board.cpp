@@ -18,7 +18,7 @@ Board::~Board() {
 
 void Board::start() {
 	for(u32 i = 0; i < CELL_COUNT; ++i)
-		setCellAt(i, static_cast<bool>(!(rand() % 6))); // ~16% chance for cele to be alive
+		setCellAt(i, static_cast<bool>(!(rand() % 6))); // ~16% chance for cell to be alive
 
 	m_logic_thread->launch();
 }

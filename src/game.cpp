@@ -21,12 +21,9 @@ Game::Game() : m_window({WINDOW_W, WINDOW_H}, "Game of Life") {
 void Game::start() {
 	sf::Event e;
 	sf::Clock frame_clock;
-	sf::Time this_frame_time, old_frame_time;
 	while(m_window.isOpen()) {
-		this_frame_time = frame_clock.getElapsedTime();
-		m_delta_time_us = this_frame_time.asMicroseconds() - old_frame_time.asMicroseconds();
+		m_delta_time_us = frame_clock.restart().asMicroseconds();
 		m_fps = 1.f / m_delta_time_us * 1000000.f;
-		old_frame_time = this_frame_time;
 
 		while(m_window.pollEvent(e))
 			handleEvent(e);
