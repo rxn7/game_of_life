@@ -7,20 +7,14 @@ print_arg_desc() {
 show_help() {
 	echo -e "\e[1;35mrxn's Game of Life CLI\n"
 	print_arg_desc "-help" "Show possible arguments"
-	print_arg_desc "-windows" "Build the game for windows"
 	print_arg_desc "-linux" "Build the game for linux"
 	print_arg_desc "-run" "Build the game for linux and run it natively"
-	print_arg_desc "-run_wine" "Build the game for windows and run it via wine"
 	print_arg_desc "-clean" "Clean the obj and bin directories"
 }
 
 for arg in "$@"; do
 	if [ "$arg" = "-help" ]; then
 		show_help
-		exit
-
-	elif [ "$arg" = "-windows" ] || [ "$arg" = "-win" ]; then
-		make -f windows.mk
 		exit
 
 	elif [ "$arg" = "-linux" ] || [ "$arg" = "-lin" ]; then
@@ -31,12 +25,6 @@ for arg in "$@"; do
 		echo -e "\e[1;32mBuilding the game for linux and running it natively...\e[0;0m"
 		make -f linux.mk
 		pushd bin/linux ; ./game_of_life ; popd
-		exit
-
-	elif [ "$arg" = "-run_wine" ]; then
-		echo -e "\e[1;32mBuilding the game for windows and running it via wine...\e[0;0m"
-		make -f windows.mk
-		pushd bin/windows ; wine ./game_of_life.exe ; popd
 		exit
 
 	elif [ "$arg" = "-clean" ]; then
