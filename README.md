@@ -12,11 +12,6 @@ Conway's game of life written in C++ using SFML library.
 * Placing cells (hold/click left mouse button)
 * Removing cells (hold/click right mouse button)
 
-# To do
-* Chunk system
-* Infinite world
-* Game settings (GUI)
-
 # Optimizations
 Used optimizations:
 * Cell culling (render only visible cells) (chunk culling should replace this in future)
@@ -36,3 +31,8 @@ Used optimizations:
 
 ## If you're on Windows
 There's no build support for windows, but in the future you should be able to download Windows binaries
+
+# To do
+* Chunk system
+* Infinite world
+* Game settings (GUI)
