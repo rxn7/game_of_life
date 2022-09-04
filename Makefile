@@ -1,8 +1,8 @@
-DIR_SRC += src
+SRC_DIR += src
 OUT += $(BIN_DIR)/game_of_life
 INC += -Isrc -Iinclude
 CFLAGS += -std=c++20 -O3
-SRC += $(wildcard $(addsuffix /*.cpp, $(DIR_SRC)))
+SRC += $(wildcard $(addsuffix /*.cpp, $(SRC_DIR)))
 OBJ += $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(SRC))
 
 all: create_dirs copy_resources $(OBJ) $(OUT)
@@ -21,4 +21,4 @@ $(OBJ_DIR)/%.o: %.cpp
 
 $(OUT): $(OBJ)
 	@mkdir -p $(@D)
-	$(CC) $(LIBS) $(OBJ) -o $@
+	$(CC) $(LDFLAGS) $(OBJ) -o $@
