@@ -27,11 +27,12 @@ Used optimizations:
 
 # Running
 ## If you're on Linux
+* NOTE: I'm sure it builds on ArchLinux and PopOS, not sure about other systems.   
 * Make sure you have SFML2 installed on your system.  
 * Run these commands:  
 	* ```git clone https://github.com/rxtthin/game_of_life```   
 	* ```cd game_of_life```   
-	* ```./cli.sh -run```  
+	* ```./cli.sh run```  
 
 ## If you're on Windows
 There's no build support for windows, but in the future you should be able to download Windows binaries
