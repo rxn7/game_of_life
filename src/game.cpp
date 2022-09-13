@@ -8,6 +8,9 @@
 #include <memory>
 #include <sstream>
 
+#define CAMERA_MIN_WIDTH 100
+#define CAMERA_MAX_WIDTH 3000
+
 Game::Game() : m_window({WINDOW_W, WINDOW_H}, "Game of Life") {
 	m_board = std::make_unique<Board>(this);
 	m_grid_renderer = std::make_unique<GridRenderer>(this);
@@ -75,7 +78,7 @@ void Game::handleEvent(const sf::Event &e) {
 			if(sf::Mouse::isButtonPressed(sf::Mouse::Middle)) {
 				const f32 zoom = m_camera_view.getSize().x / m_window.getSize().x;
 				const sf::Vector2f movement = (m_old_mouse_pos - sf::Vector2f((f32)e.mouseMove.x, (f32)e.mouseMove.y)) * zoom;
-				m_camera_view.move(movement);
+				moveCamera(movement);
 				m_grid_renderer->vertex_build_queued = true;
 			}
 			m_old_mouse_pos = { (f32)e.mouseMove.x, (f32)e.mouseMove.y, };
@@ -114,12 +117,48 @@ void Game::initGui() {
 
 void Game::zoomCameraView(f32 value) {
 	sf::Vector2i mouse_pos = sf::Mouse::getPosition(m_window);
-
 	sf::Vector2f old_pos(m_window.mapPixelToCoords(mouse_pos, m_camera_view));
-	m_camera_view.zoom(1 - value * ZOOM_FACTOR);
-	sf::Vector2f new_pos(m_window.mapPixelToCoords(mouse_pos, m_camera_view));
 
-	m_camera_view.move(old_pos - new_pos);
+	m_camera_view.zoom(1 - value * ZOOM_FACTOR);
+        sf::Vector2f size = m_camera_view.getSize();
+        f32 aspectRatio = size.y / size.x;
+
+        if(size.x < CAMERA_MIN_WIDTH) {
+                size.x = CAMERA_MIN_WIDTH;
+                size.y = CAMERA_MIN_WIDTH * aspectRatio;
+        }
+        else if(size.x > CAMERA_MAX_WIDTH) {
+                size.x = CAMERA_MAX_WIDTH;
+                size.y = CAMERA_MAX_WIDTH * aspectRatio;
+        }
+
+        m_camera_view.setSize(size);
+
+	sf::Vector2f new_pos(m_window.mapPixelToCoords(mouse_pos, m_camera_view));
+        moveCamera(old_pos - new_pos);
+}
+
+void Game::moveCamera(const sf::Vector2f &offset) {
+        m_camera_view.move(offset);
+        const sf::Vector2f size = m_camera_view.getSize() * 0.5f;
+        sf::Vector2f center = m_camera_view.getCenter();
+
+        const f32 left = center.x - size.x;
+        const f32 right = center.x + size.x;
+        const f32 top = center.y + size.y;
+        const f32 bottom = center.y - size.y;
+        const f32 maxRightAndMaxTop = CELL_SIZE*GRID_SIDE;
+
+        if(left < 0)
+                center.x = size.x;
+        else if(right > maxRightAndMaxTop)
+                center.x = maxRightAndMaxTop - size.x;
+        if(top > maxRightAndMaxTop)
+                center.y = maxRightAndMaxTop - size.y;
+        else if(bottom < 0)
+                center.y = size.y;
+
+        m_camera_view.setCenter(center);
 }
 
 void Game::updateDebugLabel() {
