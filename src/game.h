@@ -28,9 +28,10 @@ private:
 	void render();
 	void handleEvent(const sf::Event &event);
 	void zoomCameraView(float value);
-        void moveCamera(const sf::Vector2f &offset);
+	void moveCamera(const sf::Vector2f &offset);
 	void setCellAtCursor(bool value);
 	void updateDebugLabel();
+	void onResize();
 
 private:
 	std::unique_ptr<GridRenderer> m_grid_renderer;

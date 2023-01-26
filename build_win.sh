@@ -1,0 +1,1 @@
+make -f make/windows.mk all

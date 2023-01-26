@@ -19,6 +19,7 @@ Game::Game() : m_window({WINDOW_W, WINDOW_H}, "Game of Life") {
 	m_grid_renderer->start();
 
 	initGui();
+	onResize();
 }
 
 void Game::start() {
@@ -90,11 +91,7 @@ void Game::handleEvent(const sf::Event &e) {
 			break;
 
 		case sf::Event::Resized: {
-			m_grid_renderer->vertex_build_queued = true;
-			sf::Vector2f size(m_window.getSize());
-			m_camera_view.setSize(size); // TODO: Keep the zoom
-			m_ui_view.setCenter(size.x * 0.5f, size.y * 0.5f);
-			m_ui_view.setSize(size);
+			onResize();
 			break;
 		}
 
@@ -175,4 +172,12 @@ void Game::setCellAtCursor(bool value) {
 		return;
 
 	m_board->setCellAt(grid_pos, value);
+}
+
+void Game::onResize() {
+	m_grid_renderer->vertex_build_queued = true;
+	sf::Vector2f size(m_window.getSize());
+	m_camera_view.setSize(size); // TODO: Keep the zoom
+	m_ui_view.setCenter(size.x * 0.5f, size.y * 0.5f);
+	m_ui_view.setSize(size);
 }
