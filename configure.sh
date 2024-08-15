@@ -14,5 +14,3 @@ if command -v x86_64-w64-mingw32-cmake &> /dev/null ; then
 else
 	echo "x86_64-w64-mingw32-cmake not found. Windows builds will not be created!"
 fi
-
-cp build/debug/compile_commands.json .
