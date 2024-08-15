@@ -6,7 +6,7 @@ if [ $? -ne 0 ]; then
 	exit
 fi
 
-pushd build/release >/dev/null
+pushd build/release/bin >/dev/null
 ./game_of_life
 popd >/dev/null
 
