@@ -1,0 +1,4 @@
+[submodule "vendor/sfml"]
+	path = vendor/sfml
+	url = https://github.com/SFML/SFML
+	branch = 2.6.1

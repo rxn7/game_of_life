@@ -12,10 +12,12 @@
 #define CAMERA_MAX_WIDTH 3000
 
 Game::Game() : m_window({WINDOW_W, WINDOW_H}, "Game of Life") {
-	m_board = std::make_unique<Board>(this);
+	m_window.setVerticalSyncEnabled(true);
+
+	m_simulation = std::make_unique<Simulation>(this);
 	m_grid_renderer = std::make_unique<GridRenderer>(this);
 
-	m_board->start();
+	m_simulation->start();
 	m_grid_renderer->start();
 
 	initGui();
@@ -32,9 +34,22 @@ void Game::start() {
 		while(m_window.pollEvent(e))
 			handleEvent(e);
 
+		if(m_exit_triggered)
+			break;
+
+		sf::Clock clock;
+
 		update();
+		m_debug_data.update_time = clock.restart();
+
 		render();
+		m_debug_data.render_time = clock.restart();
 	}
+
+	m_window.close();
+
+	m_grid_renderer->stop();
+	m_simulation->stop();
 }
 
 void Game::update() {
@@ -61,7 +76,7 @@ void Game::render() {
 void Game::handleEvent(const sf::Event &e) {
 	switch(e.type) {
 		case sf::Event::Closed: 
-			m_window.close();
+			m_exit_triggered = true;
 			break;
 
 		case sf::Event::KeyPressed:
@@ -109,6 +124,7 @@ void Game::initGui() {
 	m_debug_label.setFont(m_font);
 	m_debug_label.setCharacterSize(20);
 	m_debug_label.setFillColor(sf::Color::White);
+	m_debug_label.setOutlineThickness(1);
 	m_debug_label.setPosition({0,0});
 }
 
@@ -160,7 +176,11 @@ void Game::moveCamera(const sf::Vector2f &offset) {
 
 void Game::updateDebugLabel() {
 	std::ostringstream output;
-	output << "fps: " << m_fps << "(" << m_delta_time_us << "us)";
+	output << "fps: " << m_fps << " " << "(" << m_delta_time_us * 0.001f << "ms)\n";
+	output << "sim thread: " << m_debug_data.sim_step_duration * 0.001f << "ms\n";
+	output << "render thread: " << m_debug_data.grid_build_duration * 0.001f << "ms\n";
+	output << "render: " << m_debug_data.render_time.asMicroseconds() * 0.001f << "ms\n";
+	output << "update: " << m_debug_data.update_time.asMicroseconds() * 0.001f << "ms\n";
 	m_debug_label.setString(output.str());
 }
 
@@ -171,7 +191,7 @@ void Game::setCellAtCursor(bool value) {
 	if(grid_pos.x < 0 || grid_pos.x >= GRID_SIDE || grid_pos.y < 0 || grid_pos.y >= GRID_SIDE)
 		return;
 
-	m_board->setCellAt(grid_pos, value);
+	m_simulation->setCellAt(grid_pos, value);
 }
 
 void Game::onResize() {

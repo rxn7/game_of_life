@@ -16,14 +16,14 @@ typedef signed long i64;
 typedef float f32;
 typedef double f64;
 
-#define WINDOW_W 1280
-#define WINDOW_H 720
-#define UPDATE_INTERVAL_MS 100
-#define CELL_SIZE 12
-#define OUTLINE_SIZE 1.f
-#define ZOOM_FACTOR 0.1f
-#define DEFAULT_CELL_COLOR sf::Color::White
-#define CLEAR_COLOR sf::Color(0x242424FF)
-#define GRID_SIDE 400
+constexpr u32 WINDOW_W = 1280;
+constexpr u32 WINDOW_H = 720;
+constexpr float UPDATE_INTERVAL_SECS = 0.1f;
+constexpr u32 CELL_SIZE = 12;
+constexpr u32 GRID_SIDE = 400;
+constexpr u32 CELL_COUNT = GRID_SIDE * GRID_SIDE;
+constexpr float OUTLINE_SIZE = 1.f;
+constexpr float ZOOM_FACTOR = 0.1f;
 
-static constexpr u32 CELL_COUNT = GRID_SIDE * GRID_SIDE;
+const sf::Color DEFAULT_CELL_COLOR = sf::Color::White;
+const sf::Color CLEAR_COLOR = sf::Color(0x242424FF);
