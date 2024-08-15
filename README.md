@@ -27,9 +27,10 @@ Used optimizations:
 
 # How to build
 
-To build the project you need to be on Linux.  
-To build linux version run `./build_lin.sh`<br>
-To build windows version run `./build_win.sh`
+Clone the project with submodules by running `git clone https://github.com/rxn7/game_of_life --recurse_submodules`<br>
+Configure the project by running `./configure.sh`<br>
+Build and run the debug version by running `./debug.sh`<br>
+Build and run the release version by running `./release.sh`<br>
 
 # To do
 
