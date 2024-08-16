@@ -3,6 +3,7 @@
 #include "grid_renderer.h"
 #include "position.h"
 #include <SFML/System/Clock.hpp>
+#include <SFML/Window/Cursor.hpp>
 #include <SFML/Window/Event.hpp>
 #include <iostream>
 #include <memory>
@@ -12,6 +13,8 @@
 #define CAMERA_MAX_WIDTH 3000
 
 Game::Game() : m_window({WINDOW_W, WINDOW_H}, "Game of Life") {
+	m_grab_cursor.loadFromSystem(sf::Cursor::Type::SizeAll);
+	m_click_cursor.loadFromSystem(sf::Cursor::Type::Hand);
 	m_window.setVerticalSyncEnabled(true);
 
 	m_simulation = std::make_unique<Simulation>(this);
@@ -53,10 +56,17 @@ void Game::start() {
 }
 
 void Game::update() {
-	if(sf::Mouse::isButtonPressed(sf::Mouse::Right))
+	if(sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
 		setCellAtCursor(false);
-	else if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		m_window.setMouseCursor(m_click_cursor);
+	} else if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
 		setCellAtCursor(true);
+		m_window.setMouseCursor(m_click_cursor);
+	} else if(sf::Mouse::isButtonPressed(sf::Mouse::Middle)) {
+		m_window.setMouseCursor(m_grab_cursor);
+	} else {
+		m_window.setMouseCursor(m_default_cursor);
+	}
 
 	updateDebugLabel();
 }
@@ -74,6 +84,8 @@ void Game::render() {
 }
 
 void Game::handleEvent(const sf::Event &e) {
+	updateCursor();
+
 	switch(e.type) {
 		case sf::Event::Closed: 
 			m_exit_triggered = true;
@@ -97,6 +109,7 @@ void Game::handleEvent(const sf::Event &e) {
 				moveCamera(movement);
 				m_grid_renderer->vertex_build_queued = true;
 			}
+
 			m_old_mouse_pos = { (f32)e.mouseMove.x, (f32)e.mouseMove.y, };
 			break;
 
@@ -200,4 +213,7 @@ void Game::onResize() {
 	m_camera_view.setSize(size); // TODO: Keep the zoom
 	m_ui_view.setCenter(size.x * 0.5f, size.y * 0.5f);
 	m_ui_view.setSize(size);
+}
+
+void Game::updateCursor() {
 }

@@ -7,6 +7,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/View.hpp>
+#include <SFML/Window/Cursor.hpp>
 #include <array>
 #include <memory>
 
@@ -35,6 +36,7 @@ private:
 	void setCellAtCursor(bool value);
 	void updateDebugLabel();
 	void onResize();
+	void updateCursor();
 
 private:
 	std::unique_ptr<GridRenderer> m_grid_renderer;
@@ -45,6 +47,7 @@ private:
 	sf::Text m_debug_label;
 	sf::Font m_font;
 	sf::Vector2f m_old_mouse_pos;
+	sf::Cursor m_default_cursor, m_grab_cursor, m_click_cursor;
 	u32 m_fps;
 	u32 m_delta_time_us;
 	bool m_is_paused = false;
