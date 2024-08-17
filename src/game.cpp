@@ -183,7 +183,7 @@ void Game::updateDebugLabel() {
 
 void Game::setCellAtCursor(const bool value) {
 	sf::Vector2f global_pos = m_window.mapPixelToCoords(sf::Mouse::getPosition(m_window), m_camera_view);
-	Position grid_pos(std::round(global_pos.x / CELL_SIZE), std::round(global_pos.y / CELL_SIZE));
+	Position grid_pos(std::floor(global_pos.x / CELL_SIZE), std::floor(global_pos.y / CELL_SIZE));
 
 	m_simulation->queueCellChange(grid_pos, value);
 }
