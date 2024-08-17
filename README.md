@@ -1,6 +1,7 @@
 # Game of Life
 
-Conway's game of life written in C++ using SFML library.
+Conway's game of life written in C++ using SFML library.  
+[Trello board](https://trello.com/b/4bR9hQpB/game-of-life)
 
 # Screenshots
 
