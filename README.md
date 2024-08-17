@@ -1,7 +1,7 @@
 # Game of Life
 
 Conway's game of life written in C++ using SFML library.  
-[Trello board](https://trello.com/b/4bR9hQpB/game-of-life)
+[Trello board](https://trello.com/b/DFLTxtSF/gameoflife)
 
 # Screenshots
 
@@ -15,6 +15,7 @@ Conway's game of life written in C++ using SFML library.
 - Pausing (hit escape or click the GUI pause button)
 - Placing cells (hold/click left mouse button)
 - Removing cells (hold/click right mouse button)
+- Infinite world
 
 # Optimizations
 
@@ -23,7 +24,7 @@ Used optimizations:
 - Cell culling (render only visible cells) (chunk culling should replace this in the future)
 - Vertex array (sending data to the GPU in single draw call)
 - Logic is calculated on separate thread
-- VertexArray building is on separate thread
+- ~~VertexArray building is on separate thread~~ temporarily removed
 - VertexArray is rebuilt only when necessary
 
 # How to build
@@ -36,5 +37,4 @@ Build and run the release version by running `./release.sh`<br>
 # To do
 
 - Chunk system
-- Infinite world
 - Game settings (GUI)
