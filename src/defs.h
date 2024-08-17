@@ -1,5 +1,3 @@
-// if you have changed something in this file without changing any source files remember to 'make clean' before compiling.
-
 #pragma once
 
 #include <SFML/Graphics/Color.hpp>
@@ -19,9 +17,7 @@ typedef double f64;
 constexpr u32 WINDOW_W = 1280;
 constexpr u32 WINDOW_H = 720;
 constexpr float UPDATE_INTERVAL_SECS = 0.1f;
-constexpr u32 CELL_SIZE = 12;
-constexpr u32 GRID_SIDE = 400;
-constexpr u32 CELL_COUNT = GRID_SIDE * GRID_SIDE;
+constexpr float CELL_SIZE = 12;
 constexpr float OUTLINE_SIZE = 1.f;
 constexpr float ZOOM_FACTOR = 0.1f;
 

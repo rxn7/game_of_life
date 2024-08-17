@@ -14,22 +14,16 @@ class GridRenderer {
 public:
 	GridRenderer(Game *game);
 	~GridRenderer();
-	void stop();
-	void start();
 	void render();
-	void updateCells();
-	inline const sf::VertexArray &getReadyVertexArray() const { return m_vertex_array_pool[m_odd_frame]; }
-	inline sf::VertexArray &getNotReadyVertexArray() { return m_vertex_array_pool[!m_odd_frame]; }
 
 private:
-	static void vertexBuildThreadFn(GridRenderer *renderer);
+	void buildVertices();
 
 public:
-	std::atomic<bool> vertex_build_queued = true;
+	bool vertex_build_queued = true;
 
 private:
 	Game *m_game;
-	std::array<sf::VertexArray, 2> m_vertex_array_pool;
-	std::unique_ptr<sf::Thread> m_vertex_build_thread;
-	std::atomic<bool> m_odd_frame = false;
+	sf::VertexArray m_vertex_array;
+	bool m_odd_frame = false;
 };

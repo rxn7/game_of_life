@@ -5,12 +5,13 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Cursor.hpp>
 #include <SFML/Window/Event.hpp>
+#include <cmath>
 #include <iostream>
 #include <memory>
 #include <sstream>
 
 #define CAMERA_MIN_WIDTH 100
-#define CAMERA_MAX_WIDTH 3000
+#define CAMERA_MAX_WIDTH 30000
 
 Game::Game() : m_window({WINDOW_W, WINDOW_H}, "Game of Life") {
 	m_grab_cursor.loadFromSystem(sf::Cursor::Type::SizeAll);
@@ -21,7 +22,6 @@ Game::Game() : m_window({WINDOW_W, WINDOW_H}, "Game of Life") {
 	m_grid_renderer = std::make_unique<GridRenderer>(this);
 
 	m_simulation->start();
-	m_grid_renderer->start();
 
 	initGui();
 	onResize();
@@ -51,7 +51,6 @@ void Game::start() {
 
 	m_window.close();
 
-	m_grid_renderer->stop();
 	m_simulation->stop();
 }
 
@@ -84,8 +83,6 @@ void Game::render() {
 }
 
 void Game::handleEvent(const sf::Event &e) {
-	updateCursor();
-
 	switch(e.type) {
 		case sf::Event::Closed: 
 			m_exit_triggered = true;
@@ -141,70 +138,54 @@ void Game::initGui() {
 	m_debug_label.setPosition({0,0});
 }
 
-void Game::zoomCameraView(f32 value) {
-	sf::Vector2i mouse_pos = sf::Mouse::getPosition(m_window);
-	sf::Vector2f old_pos(m_window.mapPixelToCoords(mouse_pos, m_camera_view));
+void Game::zoomCameraView(const f32 value) {
+	const sf::Vector2i mouse_pos = sf::Mouse::getPosition(m_window);
+	const sf::Vector2f old_pos(m_window.mapPixelToCoords(mouse_pos, m_camera_view));
 
 	m_camera_view.zoom(1 - value * ZOOM_FACTOR);
-        sf::Vector2f size = m_camera_view.getSize();
-        f32 aspectRatio = size.y / size.x;
+	sf::Vector2f size = m_camera_view.getSize();
 
-        if(size.x < CAMERA_MIN_WIDTH) {
-                size.x = CAMERA_MIN_WIDTH;
-                size.y = CAMERA_MIN_WIDTH * aspectRatio;
-        }
-        else if(size.x > CAMERA_MAX_WIDTH) {
-                size.x = CAMERA_MAX_WIDTH;
-                size.y = CAMERA_MAX_WIDTH * aspectRatio;
-        }
+	const f32 aspectRatio = size.y / size.x;
+	const f32 min_zoom_out_factor = std::min(size.x, size.y) / CELL_SIZE;
 
-        m_camera_view.setSize(size);
+	if(size.x < CAMERA_MIN_WIDTH) {
+			size.x = CAMERA_MIN_WIDTH;
+			size.y = CAMERA_MIN_WIDTH * aspectRatio;
+	}
+	else if(size.x > CAMERA_MAX_WIDTH) {
+			size.x = CAMERA_MAX_WIDTH;
+			size.y = CAMERA_MAX_WIDTH * aspectRatio;
+	}
 
-	sf::Vector2f new_pos(m_window.mapPixelToCoords(mouse_pos, m_camera_view));
-        moveCamera(old_pos - new_pos);
+	m_camera_view.setSize(size);
+
+	const sf::Vector2f new_pos(m_window.mapPixelToCoords(mouse_pos, m_camera_view));
+	moveCamera(old_pos - new_pos);
 }
 
 void Game::moveCamera(const sf::Vector2f &offset) {
-        m_camera_view.move(offset);
-        const sf::Vector2f size = m_camera_view.getSize() * 0.5f;
-        sf::Vector2f center = m_camera_view.getCenter();
+	m_camera_view.move(offset);
+	const sf::Vector2f size = m_camera_view.getSize() * 0.5f;
+	sf::Vector2f center = m_camera_view.getCenter();
 
-        const f32 left = center.x - size.x;
-        const f32 right = center.x + size.x;
-        const f32 top = center.y + size.y;
-        const f32 bottom = center.y - size.y;
-        const f32 maxRightAndMaxTop = CELL_SIZE*GRID_SIDE;
-
-        if(left < 0)
-                center.x = size.x;
-        else if(right > maxRightAndMaxTop)
-                center.x = maxRightAndMaxTop - size.x;
-        if(top > maxRightAndMaxTop)
-                center.y = maxRightAndMaxTop - size.y;
-        else if(bottom < 0)
-                center.y = size.y;
-
-        m_camera_view.setCenter(center);
+	m_camera_view.setCenter(center);
 }
 
 void Game::updateDebugLabel() {
 	std::ostringstream output;
 	output << "fps: " << m_fps << " " << "(" << m_delta_time_us * 0.001f << "ms)\n";
 	output << "sim thread: " << m_debug_data.sim_step_duration * 0.001f << "ms\n";
-	output << "render thread: " << m_debug_data.grid_build_duration * 0.001f << "ms\n";
+	output << "vertex build: " << m_debug_data.grid_build_duration * 0.001f << "ms\n";
 	output << "render: " << m_debug_data.render_time.asMicroseconds() * 0.001f << "ms\n";
 	output << "update: " << m_debug_data.update_time.asMicroseconds() * 0.001f << "ms\n";
 	m_debug_label.setString(output.str());
 }
 
-void Game::setCellAtCursor(bool value) {
+void Game::setCellAtCursor(const bool value) {
 	sf::Vector2f global_pos = m_window.mapPixelToCoords(sf::Mouse::getPosition(m_window), m_camera_view);
-	Position grid_pos(global_pos.x / CELL_SIZE, global_pos.y / CELL_SIZE);
+	Position grid_pos(std::round(global_pos.x / CELL_SIZE), std::round(global_pos.y / CELL_SIZE));
 
-	if(grid_pos.x < 0 || grid_pos.x >= GRID_SIDE || grid_pos.y < 0 || grid_pos.y >= GRID_SIDE)
-		return;
-
-	m_simulation->setCellAt(grid_pos, value);
+	m_simulation->queueCellChange(grid_pos, value);
 }
 
 void Game::onResize() {
@@ -213,7 +194,4 @@ void Game::onResize() {
 	m_camera_view.setSize(size); // TODO: Keep the zoom
 	m_ui_view.setCenter(size.x * 0.5f, size.y * 0.5f);
 	m_ui_view.setSize(size);
-}
-
-void Game::updateCursor() {
 }

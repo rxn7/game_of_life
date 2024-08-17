@@ -2,9 +2,12 @@
 
 #include "defs.h"
 #include "position.h"
+#include <SFML/System/Mutex.hpp>
 #include <SFML/System/Thread.hpp>
 #include <atomic>
 #include <memory>
+#include <mutex>
+#include <unordered_set>
 
 class Game;
 
@@ -14,20 +17,35 @@ public:
 	~Simulation();
 	void stop();
 	void start();
-	void setCellAt(u32 idx, bool value);
-
-	inline void setCellAt(Position pos, bool value) { setCellAt(pos.asGridIndex(), value); }
-	inline bool getCellAt(u32 idx) const { return m_cells[idx]; }
-	inline bool getCellAt(Position pos) const { return m_cells[pos.asGridIndex()]; }
-	inline const bool *getCells() const { return m_cells; }
+	void queueCellChange(const Position &position, const bool value);
+	void forEachCell(const std::function<bool(const Position &)> &callback);
 
 private:
-	static void logicThreadFn(Simulation *board);
-	void applyLogic();
+	inline bool isAlive(const Position &pos) const {
+		return m_cells.count(pos) != 0;
+	}
+
+	inline void createCell(const Position &position) {
+		m_cells.insert(position);
+	}
+
+	inline void killCell(const Position &position) {
+		m_cells.erase(position);
+	}
+
 	u8 countCellNeighbours(const Position &pos);
+	void applyLogic();
+	static void logicThreadFn(Simulation *board);
+
+public:
+	std::mutex cells_mutex;
 
 private:
 	Game *m_game;
-	bool *m_cells;
+
+	std::unordered_set<Position> m_cells;
 	std::unique_ptr<sf::Thread> m_logic_thread;
+
+	std::mutex m_queued_changes_mutex;
+	std::vector<std::pair<Position, bool>> m_queued_changes;
 };
