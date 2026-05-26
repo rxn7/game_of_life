@@ -1,3 +1,6 @@
+# ⚠️ REPOSITORY MOVED ⚠️
+### this repository is now hosted at [https://codeberg.org/rxn/game_of_life](https://codeberg.org/rxn/game_of_life)</b>
+
 # Game of Life
 
 Conway's game of life written in C++ using SFML library.
